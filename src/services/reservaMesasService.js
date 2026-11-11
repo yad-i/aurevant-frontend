@@ -1,4 +1,3 @@
-// src/services/reservaMesasService.js
 import api from '@/services/api'
 
 export const listarReservaMesas = () => api.get('/reserva-mesas')

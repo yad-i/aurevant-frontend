@@ -1,14 +1,12 @@
 <template>
   <v-app>
     <v-navigation-drawer permanent width="230" color="#0F3D2E" class="sidebar">
-      
       <div class="brand">
         <img :src="require('@/assets/logo.png')" alt="AUREVANT Resort" class="brand-logo" />
         <div class="brand-name">AUREVANT</div>
         <div class="brand-sub">R E S O R T</div>
         <div class="brand-tag">El lujo encuentra su altura</div>
       </div>
-
       <v-list nav density="comfortable" class="px-3">
         <v-list-item
           v-for="item in menu"
@@ -21,7 +19,6 @@
           active-class="nav-active"
         />
       </v-list>
-
       <template #append>
         <v-divider class="mx-4 mb-2" color="#D4B483" opacity="0.3" />
         <v-list nav density="comfortable" class="px-3 pb-3">
@@ -29,7 +26,6 @@
         </v-list>
       </template>
     </v-navigation-drawer>
-
     <v-app-bar flat color="#FFFFFF" height="64" class="topbar">
       <v-spacer />
       <v-btn icon="mdi-bell-outline" variant="text" color="#1A1A1A" />
@@ -46,7 +42,6 @@
         </v-list>
       </v-menu>
     </v-app-bar>
-
     <v-main>
       <v-container fluid class="pa-6">
         <router-view />
@@ -54,17 +49,13 @@
     </v-main>
   </v-app>
 </template>
-
 <script setup>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-
 const store = useStore()
 const router = useRouter()
-
 const rolLabel = computed(() => (store.getters['auth/isAdmin'] ? 'Administrador' : 'Recepcionista'))
-
 const menuAdmin = [
   { title: 'Inicio', icon: 'mdi-home-outline', to: '/admin' },
   { title: 'Habitaciones', icon: 'mdi-bed-outline', to: '/admin/habitaciones' },
@@ -73,7 +64,6 @@ const menuAdmin = [
   { title: 'Clientes', icon: 'mdi-account-group-outline', to: '/admin/clientes' },
   { title: 'Servicios', icon: 'mdi-spa', to: '/admin/servicios' }
 ]
-
 const menuRecepcion = [
   { title: 'Inicio', icon: 'mdi-home-outline', to: '/recepcion' },
   { title: 'Reservaciones', icon: 'mdi-bed-outline', to: '/recepcion/reservas' },
@@ -82,18 +72,14 @@ const menuRecepcion = [
   { title: 'Solicitudes', icon: 'mdi-bell-outline', to: '/recepcion/solicitudes' },
   { title: 'Servicios', icon: 'mdi-spa', to: '/recepcion/servicios' }
 ]
-
 const menu = computed(() => (store.getters['auth/isAdmin'] ? menuAdmin : menuRecepcion))
-
 function salir() {
   store.dispatch('auth/logout')
   router.push('/login')
 }
 </script>
-
 <style scoped>
 .sidebar { border-right: none !important; }
-
 .brand {
   text-align: center;
   padding: 26px 16px 22px;
@@ -125,7 +111,6 @@ function salir() {
   opacity: 0.85;
   margin-top: 8px;
 }
-
 .nav-item {
   color: #E9E1D2 !important;
   font-size: 14px;
@@ -138,6 +123,5 @@ function salir() {
   color: #D4B483 !important;
   border-left: 3px solid #D4B483;
 }
-
 .topbar { border-bottom: 1px solid rgba(212, 180, 131, 0.35) !important; }
 </style>

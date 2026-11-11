@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
 const routes = [
   { path: '/', redirect: '/login' },
   {
@@ -36,32 +35,24 @@ const routes = [
   },
   { path: '/:pathMatch(.*)*', redirect: '/login' }
 ]
-
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
 })
-
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   const publico = to.meta.publico === true
   const user = JSON.parse(localStorage.getItem('user') || '{}')
-
   if (!token && !publico) return next('/login')
-
   if (token && to.path === '/login') {
     return next(user.rol === 'admin' ? '/admin/home' : '/recepcion/home')
   }
-
   if (token && to.path.startsWith('/admin') && user.rol !== 'admin') {
     return next('/recepcion/home')
   }
-
   if (token && to.path.startsWith('/recepcion') && user.rol !== 'recepcion') {
     return next('/admin/home')
   }
-
   next()
 })
-
 export default router

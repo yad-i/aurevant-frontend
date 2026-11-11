@@ -10,8 +10,6 @@
         <div class="text-caption text-medium-emphasis">{{ hora }}</div>
       </div>
     </div>
-
-    <!-- KPIs -->
     <v-row class="mb-2">
       <v-col cols="12" sm="6" md="4">
         <v-card class="pa-4 kpi">
@@ -33,17 +31,13 @@
         </v-card>
       </v-col>
     </v-row>
-
     <v-row>
-      <!-- Columna izquierda -->
       <v-col cols="12" md="8">
-        <!-- Reservaciones: tarjetas con info -->
         <v-card class="pa-4 mb-4">
           <div class="d-flex justify-space-between align-center mb-3">
             <h3 class="text-subtitle-1 font-weight-bold">Reservaciones</h3>
             <v-btn variant="text" size="small" color="#0F3D2E" to="/recepcion/reservas">Ver todas →</v-btn>
           </div>
-
           <div v-if="recientes.length" class="d-flex flex-column" style="gap: 10px">
             <div v-for="r in recientes" :key="r.id_reserva || r.id" class="mini-card">
               <div class="mini-stripe" :style="{ background: colorEstado(r.estado) }" />
@@ -65,7 +59,6 @@
           </div>
           <p v-else class="text-body-2 text-medium-emphasis mb-0">No hay reservaciones registradas.</p>
         </v-card>
-
         <v-row>
           <v-col cols="12" sm="6">
             <v-card class="pa-4">
@@ -93,13 +86,9 @@
           </v-col>
         </v-row>
       </v-col>
-
-      <!-- Columna derecha -->
       <v-col cols="12" md="4">
-        <!-- Estado de habitaciones: dona que se actualiza -->
         <v-card class="pa-4 mb-4">
           <h3 class="text-subtitle-1 font-weight-bold mb-3">Estado de habitaciones</h3>
-
           <div class="d-flex justify-center mb-4">
             <div class="dona-wrap" :style="{ background: pastelGradient }">
               <div class="dona-hole">
@@ -108,21 +97,17 @@
               </div>
             </div>
           </div>
-
           <div v-for="e in estadosHabLista" :key="e.label" class="leyenda-row">
             <span class="dot" :style="{ background: e.color }" />
             <span class="flex-grow-1 text-body-2">{{ e.label }}</span>
             <span class="text-body-2 font-weight-bold">{{ e.value }}</span>
           </div>
         </v-card>
-
-        <!-- Próximas reservaciones -->
         <v-card class="pa-4">
           <div class="d-flex justify-space-between align-center mb-3">
             <h3 class="text-subtitle-1 font-weight-bold">Próximas reservaciones</h3>
             <v-chip size="x-small" color="#C9A227" variant="flat">{{ proximas.length }}</v-chip>
           </div>
-
           <div v-if="proximas.length" class="d-flex flex-column" style="gap: 10px">
             <div v-for="r in proximas" :key="r.id_reserva || r.id" class="mini-card">
               <div class="mini-stripe" :style="{ background: colorEstado(r.estado) }" />
@@ -145,8 +130,6 @@
         </v-card>
       </v-col>
     </v-row>
-
-    <!-- Diálogo de detalle -->
     <v-dialog v-model="dialogoDetalle" max-width="460">
       <v-card rounded="xl" class="overflow-hidden">
         <div class="pa-5" style="background:#0F3D2E; color:#F5EFE0">
@@ -161,7 +144,6 @@
           </div>
           <div class="text-body-2 mt-2">{{ detalle?.cliente?.nombre || detalle?.cliente }}</div>
         </div>
-
         <v-card-text class="pa-5">
           <div class="d-flex justify-space-between py-2">
             <span class="text-medium-emphasis">Habitación</span>
@@ -183,7 +165,6 @@
             <span class="font-weight-medium">{{ noches(detalle || {}) || '—' }}</span>
           </div>
         </v-card-text>
-
         <v-card-actions class="px-5 pb-4">
           <v-spacer />
           <v-btn variant="text" @click="dialogoDetalle = false">Cerrar</v-btn>
@@ -192,65 +173,51 @@
     </v-dialog>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { obtenerDashboard } from '@/services/dashboardService'
-
 const cargando = ref(true)
 const error = ref(null)
-
 const reservas = ref([])
 const checkins = ref([])
 const checkouts = ref([])
 const proximas = ref([])
-
 const dialogoDetalle = ref(false)
 const detalle = ref(null)
-
 const kpis = ref({
   habitaciones_total: 0,
   clientes_hoy: 0,
   solicitudes_pendientes: 0
 })
-
 const estadoHab = ref({
   disponibles: 0,
   ocupadas: 0,
   mantenimiento: 0,
   limpieza: 0
 })
-
 const saludo = computed(() => {
   const h = new Date().getHours()
   if (h < 12) return '¡Buenos días'
   if (h < 19) return '¡Buenas tardes'
   return '¡Buenas noches'
 })
-
 const fechaHoy = computed(() =>
   new Date().toLocaleDateString('es-SV', { day: 'numeric', month: 'long', year: 'numeric' })
 )
-
 const hora = computed(() =>
   new Date().toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit' })
 )
-
-/* ---- utilidades de fecha ---- */
 const soloFecha = (f) => (f ? String(f).slice(0, 10) : '')
-
 const hoyStr = () => {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
-
 function fecha(valor) {
   const s = soloFecha(valor)
   if (!s) return '—'
   const [y, m, d] = s.split('-')
   return `${d}/${m}/${y}`
 }
-
 function noches(r) {
   if (!r) return ''
   const ini = soloFecha(r.fecha_inicio)
@@ -259,7 +226,6 @@ function noches(r) {
   const n = Math.round((new Date(fin + 'T00:00:00') - new Date(ini + 'T00:00:00')) / 86400000)
   return n > 0 ? `${n} ${n === 1 ? 'noche' : 'noches'}` : ''
 }
-
 function diasPara(f) {
   const s = soloFecha(f)
   if (!s) return '—'
@@ -268,7 +234,6 @@ function diasPara(f) {
   if (d === 1) return 'mañana'
   return `${d} días`
 }
-
 function colorEstado(estado) {
   const e = (estado || '').toLowerCase()
   if (e === 'confirmada') return '#0F3D2E'
@@ -278,8 +243,6 @@ function colorEstado(estado) {
   if (e === 'finalizada') return '#7F8C8D'
   return 'grey'
 }
-
-/* ---- ocupación real de hoy (desde las reservas activas) ---- */
 const reservasActivasHoy = computed(() => {
   const hoy = hoyStr()
   return reservas.value.filter((r) => {
@@ -290,30 +253,22 @@ const reservasActivasHoy = computed(() => {
     return vigente && ini && fin && ini <= hoy && hoy <= fin
   })
 })
-
 const ocupadasHoy = computed(() => reservasActivasHoy.value.length)
-
 const totalHabitaciones = computed(() => kpis.value.habitaciones_total || 0)
-
 const porcentajeOcupacion = computed(() => {
   if (!totalHabitaciones.value) return 0
   return (ocupadasHoy.value / totalHabitaciones.value) * 100
 })
-
-/* ---- reservaciones: todas, las últimas 4 ---- */
 const recientes = computed(() => {
   return [...reservas.value]
     .sort((a, b) => String(soloFecha(b.fecha_inicio) || '').localeCompare(String(soloFecha(a.fecha_inicio) || '')))
     .slice(0, 4)
 })
-
-/* ---- dona de estado de habitaciones ---- */
 const estadosHabLista = computed(() => {
   const ocupadas = ocupadasHoy.value
   const mantenimiento = estadoHab.value.mantenimiento || 0
   const limpieza = estadoHab.value.limpieza || 0
   const disponibles = Math.max(totalHabitaciones.value - ocupadas - mantenimiento - limpieza, 0)
-
   return [
     { label: 'Disponibles', value: disponibles, color: '#0F3D2E' },
     { label: 'Ocupadas', value: ocupadas, color: '#D4B483' },
@@ -321,11 +276,9 @@ const estadosHabLista = computed(() => {
     { label: 'Limpieza', value: limpieza, color: '#8A8A8A' }
   ]
 })
-
 const pastelGradient = computed(() => {
   const total = estadosHabLista.value.reduce((s, e) => s + e.value, 0)
   if (!total) return '#F0EBE0'
-
   let acumulado = 0
   const partes = estadosHabLista.value.map((e) => {
     const desde = (acumulado / total) * 100
@@ -335,23 +288,17 @@ const pastelGradient = computed(() => {
   })
   return `conic-gradient(${partes.join(', ')})`
 })
-
-/* ---- detalle ---- */
 function verDetalle(r) {
   detalle.value = r
   dialogoDetalle.value = true
 }
-
-/* ---- carga de datos ---- */
 async function cargar() {
   cargando.value = true
   error.value = null
   try {
     const { data } = await obtenerDashboard()
-
     kpis.value = { ...kpis.value, ...(data.kpis || {}) }
     estadoHab.value = { ...estadoHab.value, ...(data.estado_habitaciones || {}) }
-
     reservas.value = data.reservaciones || data.reservas || []
     checkins.value = data.checkins || []
     checkouts.value = data.checkouts || []
@@ -363,30 +310,24 @@ async function cargar() {
     cargando.value = false
   }
 }
-
 let intervalo = null
 const alVolver = () => { if (document.visibilityState === 'visible') cargar() }
-
 onMounted(() => {
   cargar()
   intervalo = setInterval(cargar, 30000)
   document.addEventListener('visibilitychange', alVolver)
 })
-
 onUnmounted(() => {
   if (intervalo) clearInterval(intervalo)
   document.removeEventListener('visibilitychange', alVolver)
 })
 </script>
-
 <style scoped>
 .kpi {
   border: 1px solid rgba(212, 180, 131, 0.45);
   border-radius: 12px;
   background: #FFFFFF;
 }
-
-/* dona */
 .dona-wrap {
   width: 150px;
   height: 150px;
@@ -414,8 +355,6 @@ onUnmounted(() => {
 }
 .leyenda-row:last-child { border-bottom: none; }
 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-
-/* mini tarjetas */
 .mini-card {
   position: relative;
   display: flex;

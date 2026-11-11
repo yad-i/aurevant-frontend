@@ -4,7 +4,6 @@
       <h2 class="page-title">Servicios</h2>
       <p class="page-sub">Comodidades y experiencias disponibles en AUREVANT Resort.</p>
     </div>
-
     <v-row dense>
       <v-col v-for="s in servicios" :key="s.titulo" cols="12" sm="6" md="4">
         <v-card class="servicio" elevation="0">
@@ -15,12 +14,10 @@
               </div>
             </template>
           </v-img>
-
           <div class="pa-5">
             <div class="servicio-cat">{{ s.categoria }}</div>
             <div class="servicio-titulo">{{ s.titulo }}</div>
             <p class="servicio-desc">{{ s.descripcion }}</p>
-
             <div v-if="s.items?.length" class="mt-3">
               <div v-for="i in s.items" :key="i" class="servicio-item">
                 <v-icon size="14" color="#0F3D2E">mdi-check-circle-outline</v-icon>
@@ -33,7 +30,6 @@
     </v-row>
   </v-container>
 </template>
-
 <script setup>
 const servicios = [
   {
@@ -73,11 +69,9 @@ const servicios = [
   }
 ]
 </script>
-
 <style scoped>
 .page-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: #1A1A1A; }
 .page-sub { font-size: 13px; color: #6B6B6B; }
-
 .servicio {
   background: #FFFFFF;
   border: 1px solid rgba(212, 180, 131, 0.45);

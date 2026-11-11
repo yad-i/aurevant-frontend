@@ -1,7 +1,6 @@
 <template>
   <div>
-    <!-- Encabezado -->
-    <div class="d-flex justify-space-between align-start mb-6">
+¿    <div class="d-flex justify-space-between align-start mb-6">
       <div>
         <h2 class="page-title">¡Bienvenido, Administrador!</h2>
         <p class="page-sub">Gestiona las habitaciones, platillos y reservaciones de AUREVANT Resort.</p>
@@ -11,9 +10,7 @@
         <div class="hora">{{ hora }}</div>
       </div>
     </div>
-
-    <!-- KPIs -->
-    <v-row dense class="mb-4">
+¿    <v-row dense class="mb-4">
       <v-col cols="12" sm="6" md="4">
         <StatCard
           icon="mdi-bed-outline"
@@ -39,9 +36,7 @@
         />
       </v-col>
     </v-row>
-
     <v-row dense>
-      <!-- Columna izquierda -->
       <v-col cols="12" md="8">
         <v-card class="panel mb-4" elevation="0">
           <div class="panel-head">
@@ -81,8 +76,6 @@
             </template>
           </v-data-table>
         </v-card>
-
-        <!-- Clientes recientes -->
         <v-card class="panel mb-4" elevation="0">
           <div class="panel-head">
             <span class="panel-title">Clientes recientes</span>
@@ -125,7 +118,6 @@
             </template>
           </v-data-table>
         </v-card>
-
         <v-card class="panel" elevation="0">
           <div class="panel-head">
             <span class="panel-title">Platillos</span>
@@ -173,7 +165,6 @@
           </v-data-table>
         </v-card>
       </v-col>
-
       <!-- Columna derecha -->
       <v-col cols="12" md="4">
         <v-card class="panel mb-4" elevation="0">
@@ -204,7 +195,6 @@
             </v-list>
           </div>
         </v-card>
-
         <v-card class="panel mb-4" elevation="0">
           <div class="panel-head">
             <span class="panel-title">Habitaciones destacadas</span>
@@ -246,7 +236,6 @@
     </v-row>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -255,24 +244,17 @@ import { listarPlatillos } from '@/services/platillosService'
 import { listarReservas } from '@/services/reservasService'
 import { listarHabitaciones } from '@/services/habitacionesService'
 import { listarClientes } from '@/services/clientesService'
-
 const router = useRouter()
-
 const API_BASE = 'http://localhost:8000'
-
-/* Convierte "/storage/..." o "platillos/abc.jpg" en URL completa */
 function urlImagen(ruta) {
   if (!ruta) return ''
   if (ruta.startsWith('http') || ruta.startsWith('blob:')) return ruta
   if (ruta.startsWith('/storage/')) return `${API_BASE}${ruta}`
   return `${API_BASE}/storage/${ruta}`
 }
-
 const ahora = new Date()
 const fecha = ahora.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
 const hora = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-
-/* ---------- Reservaciones (desde la API) ---------- */
 const headersReservas = [
   { title: 'Cliente', key: 'cliente' },
   { title: 'Habitación', key: 'habitacion' },
@@ -281,17 +263,13 @@ const headersReservas = [
   { title: 'Estado', key: 'estado' },
   { title: 'Acciones', key: 'acciones', sortable: false }
 ]
-
 const reservas = ref([])
 const cargandoReservas = ref(false)
-
-/* Solo las 4 más recientes */
 const reservasRecientes = computed(() =>
   [...reservas.value]
     .sort((a, b) => Number(b.id_reserva ?? 0) - Number(a.id_reserva ?? 0))
     .slice(0, 4)
 )
-
 const hoy = new Date().toISOString().slice(0, 10)
 const reservasHoy = computed(
   () => reservas.value.filter(r => String(r.fecha_inicio).slice(0, 10) === hoy).length
@@ -299,14 +277,12 @@ const reservasHoy = computed(
 const reservasPendientes = computed(
   () => reservas.value.filter(r => String(r.estado).toLowerCase() === 'pendiente').length
 )
-
 function formatearFecha(f) {
   if (!f) return '—'
   const limpia = String(f).slice(0, 10)
   const [y, m, d] = limpia.split('-')
   return `${d}/${m}/${y}`
 }
-
 function colorEstado(e) {
   const estado = String(e || '').toLowerCase()
   if (estado === 'confirmada') return 'success'
@@ -314,11 +290,9 @@ function colorEstado(e) {
   if (estado === 'cancelada') return 'error'
   return 'grey'
 }
-
 function verReserva(item) {
   router.push({ path: '/admin/reservaciones', query: { cliente: item.cliente } })
 }
-
 async function cargarReservas() {
   cargandoReservas.value = true
   try {
@@ -330,27 +304,21 @@ async function cargarReservas() {
     cargandoReservas.value = false
   }
 }
-
-/* ---------- Clientes (desde la API) ---------- */
 const headersClientes = [
   { title: 'Cliente', key: 'nombre' },
   { title: 'Teléfono', key: 'telefono' },
   { title: 'DUI', key: 'DUI' },
   { title: 'Acciones', key: 'acciones', sortable: false }
 ]
-
 const clientes = ref([])
 const cargandoClientes = ref(false)
-
 const clientesMes = computed(() => clientes.value.length)
-
 /* Solo los 4 más recientes */
 const clientesRecientes = computed(() =>
   [...clientes.value]
     .sort((a, b) => Number(b.id_cliente ?? 0) - Number(a.id_cliente ?? 0))
     .slice(0, 4)
 )
-
 async function cargarClientes() {
   cargandoClientes.value = true
   try {
@@ -362,13 +330,10 @@ async function cargarClientes() {
     cargandoClientes.value = false
   }
 }
-
 function verCliente(item) {
   const id = item.id_cliente ?? item.id
   router.push({ path: '/admin/clientes', query: { id } })
 }
-
-/* ---------- Platillos (desde la API) ---------- */
 const headersPlatillos = [
   { title: 'Imagen', key: 'img', sortable: false },
   { title: 'Nombre', key: 'nombre' },
@@ -377,25 +342,20 @@ const headersPlatillos = [
   { title: 'Estado', key: 'activo' },
   { title: 'Acciones', key: 'acciones', sortable: false }
 ]
-
 const platillos = ref([])
 const cargandoPlatillos = ref(false)
-
 const platillosActivos = computed(
   () => platillos.value.filter(p => p.activo).length
 )
 const platillosDesactivados = computed(
   () => platillos.value.filter(p => !p.activo).length
 )
-
-/* Solo 4 platillos activos en el panel */
 const platillosVisibles = computed(() =>
   platillos.value
     .filter(p => p.activo)
     .sort((a, b) => Number(b.id_platillo ?? 0) - Number(a.id_platillo ?? 0))
     .slice(0, 4)
 )
-
 async function cargarPlatillos() {
   cargandoPlatillos.value = true
   try {
@@ -407,10 +367,7 @@ async function cargarPlatillos() {
     cargandoPlatillos.value = false
   }
 }
-
-/* ---------- Habitaciones (desde la API) ---------- */
 const habitaciones = ref([])
-
 const totalHabitaciones = computed(() => habitaciones.value.length)
 const disponibles = computed(
   () => habitaciones.value.filter(h => h.activa && h.estado === 'Disponible').length
@@ -424,39 +381,32 @@ const enMantenimiento = computed(
 const inactivas = computed(
   () => habitaciones.value.filter(h => !h.activa).length
 )
-
 const porcentajeDisponible = computed(() =>
   totalHabitaciones.value
     ? Math.round((disponibles.value / totalHabitaciones.value) * 100)
     : 0
 )
-
 const estados = computed(() => [
   { label: 'Disponibles', value: disponibles.value, color: '#0F3D2E' },
   { label: 'Ocupadas', value: ocupadas.value, color: '#D4B483' },
   { label: 'Mantenimiento', value: enMantenimiento.value, color: '#C9C2B4' },
   { label: 'Inactivas', value: inactivas.value, color: '#B0B0B0' }
 ])
-
-/* Destacadas: solo disponibles, ordenadas por precio */
 const destacadas = computed(() =>
   habitaciones.value
     .filter(h => h.activa && h.estado === 'Disponible')
     .sort((a, b) => Number(b.precio_noche) - Number(a.precio_noche))
     .slice(0, 3)
 )
-
 function colorHabitacion(e) {
   if (e === 'Disponible') return 'success'
   if (e === 'Ocupada') return 'warning'
   if (e === 'Mantenimiento') return 'grey'
   return 'error'
 }
-
 function verHabitacion(h) {
   router.push({ path: '/admin/habitaciones', query: { numero: h.numero } })
 }
-
 async function cargarHabitaciones() {
   try {
     const { data } = await listarHabitaciones()
@@ -465,39 +415,31 @@ async function cargarHabitaciones() {
     habitaciones.value = []
   }
 }
-
-/* ---------- Refresco automático ---------- */
 function cargarTodo() {
   cargarPlatillos()
   cargarReservas()
   cargarHabitaciones()
   cargarClientes()
 }
-
 let intervalo = null
-
 function alVolverALaPestana() {
   if (document.visibilityState === 'visible') cargarTodo()
 }
-
 onMounted(() => {
   cargarTodo()
-  intervalo = setInterval(cargarTodo, 30000) // cada 30 s
+  intervalo = setInterval(cargarTodo, 30000) 
   document.addEventListener('visibilitychange', alVolverALaPestana)
 })
-
 onUnmounted(() => {
   if (intervalo) clearInterval(intervalo)
   document.removeEventListener('visibilitychange', alVolverALaPestana)
 })
 </script>
-
 <style scoped>
 .page-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: #1A1A1A; }
 .page-sub { font-size: 13px; color: #6B6B6B; }
 .fecha { font-size: 13px; color: #1A1A1A; font-weight: 500; }
 .hora { font-size: 11px; color: #8A8A8A; }
-
 .panel {
   background: #FFFFFF;
   border: 1px solid rgba(212, 180, 131, 0.45);
@@ -511,17 +453,14 @@ onUnmounted(() => {
   margin-bottom: 8px;
 }
 .panel-title { font-size: 15px; font-weight: 600; color: #1A1A1A; }
-
 .dona-num { font-size: 20px; font-weight: 600; color: #1A1A1A; }
 .dona-lbl { font-size: 10px; color: #8A8A8A; }
 .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; }
-
 .mini { border: 1px solid rgba(212, 180, 131, 0.4); border-radius: 10px; overflow: hidden; }
 .mini-title { font-size: 11px; font-weight: 600; color: #1A1A1A; }
 .mini-price { font-size: 12px; color: #0F3D2E; font-weight: 600; }
 .mini-price span { font-size: 9px; color: #8A8A8A; font-weight: 400; }
 .mini-meta { font-size: 9px; color: #8A8A8A; }
-
 .cli-nombre { font-size: 13px; font-weight: 500; color: #1A1A1A; }
 .cli-sub { font-size: 11px; color: #8A8A8A; }
 </style>

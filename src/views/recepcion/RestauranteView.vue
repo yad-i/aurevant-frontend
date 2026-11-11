@@ -9,10 +9,7 @@
         Actualizar
       </v-btn>
     </div>
-
     <v-alert v-if="error" type="error" variant="tonal" class="mb-4">{{ error }}</v-alert>
-
-    <!-- RESUMEN -->
     <v-row class="mb-2">
       <v-col cols="12" sm="4">
         <v-card class="pa-4 resumen">
@@ -33,12 +30,10 @@
         </v-card>
       </v-col>
     </v-row>
-
     <v-tabs v-model="tab" color="#0F3D2E" class="mb-4">
       <v-tab value="mesas">Mesas</v-tab>
       <v-tab value="menu">Menú</v-tab>
     </v-tabs>
-
     <v-window v-model="tab">
       <!-- MESAS -->
       <v-window-item value="mesas">
@@ -49,7 +44,6 @@
                 <span class="text-h6">Mesa {{ m.id_mesa }}</span>
                 <v-chip size="small" :color="colorMesa(m)" variant="flat">{{ m.estado }}</v-chip>
               </div>
-
               <p class="text-body-2 mt-2 mb-1">
                 <v-icon size="16" class="mr-1">mdi-account-group</v-icon>
                 {{ m.capacidad }} personas
@@ -65,7 +59,6 @@
                 </span>
                 <span v-else class="text-medium-emphasis">Sin reserva</span>
               </p>
-
               <div class="d-flex justify-space-between align-center mt-2">
                 <v-btn
                   size="small"
@@ -92,16 +85,12 @@
             </v-card>
           </v-col>
         </v-row>
-
         <v-card v-else-if="!cargando" class="pa-8 text-center">
           <v-icon size="48" style="color:#D4B483">mdi-table-chair</v-icon>
           <p class="mt-2 text-body-2 text-medium-emphasis">No hay mesas registradas.</p>
         </v-card>
-
         <v-progress-linear v-if="cargando" indeterminate color="#0F3D2E" class="mt-4" />
       </v-window-item>
-
-      <!-- MENÚ -->
       <v-window-item value="menu">
         <v-card class="pa-4">
           <v-data-table
@@ -128,8 +117,6 @@
         </v-card>
       </v-window-item>
     </v-window>
-
-    <!-- DIÁLOGO DE DETALLE (solo mesas) -->
     <v-dialog v-model="dialogoDetalle" max-width="520">
       <v-card rounded="xl" class="overflow-hidden">
         <div class="pa-5" style="background:#0F3D2E; color:#F5EFE0">
@@ -144,7 +131,6 @@
           </div>
           <div class="text-body-2 mt-2">{{ detalle?.subtitulo }}</div>
         </div>
-
         <v-card-text class="pa-5">
           <template v-for="(fila, i) in detalle?.filas || []" :key="i">
             <div class="d-flex justify-space-between py-2">
@@ -154,7 +140,6 @@
             <v-divider v-if="i < detalle.filas.length - 1" />
           </template>
         </v-card-text>
-
         <v-card-actions class="px-5 pb-4">
           <v-spacer />
           <v-btn variant="text" @click="dialogoDetalle = false">Cerrar</v-btn>
@@ -164,19 +149,15 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-    <!-- DIÁLOGO DE NUEVA RESERVA DE MESA -->
     <v-dialog v-model="dialogoReserva" max-width="560">
       <v-card class="pa-4">
         <h3 class="text-h6 mb-1">Reservar mesa {{ form.id_mesa }}</h3>
         <p class="text-body-2 text-medium-emphasis mb-4">
           Se registrará como <strong>pendiente</strong> hasta que el administrador la apruebe.
         </p>
-
         <v-alert v-if="errorForm" type="error" variant="tonal" density="compact" class="mb-3">
           {{ errorForm }}
         </v-alert>
-
         <v-select
           v-model="form.id_cliente"
           :items="clientes"
@@ -201,7 +182,6 @@
           :hint="`Capacidad máxima: ${mesaSeleccionada?.capacidad || '—'}`"
           persistent-hint
         />
-
         <div class="d-flex justify-end mt-4" style="gap: 8px">
           <v-btn variant="text" @click="dialogoReserva = false">Cancelar</v-btn>
           <v-btn color="#0F3D2E" :loading="guardando" @click="guardarReserva">
@@ -210,22 +190,18 @@
         </div>
       </v-card>
     </v-dialog>
-
     <v-snackbar v-model="aviso" color="#0F3D2E" timeout="2200" location="bottom right">
       {{ avisoTexto }}
     </v-snackbar>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import api from '@/services/api'
 import { listarPlatillos } from '@/services/platillosService'
 import { listarClientes } from '@/services/clientesService'
 import { crearReservaMesa } from '@/services/reservaMesasService'
-
 const API_BASE = 'http://localhost:8000'
-
 const tab = ref('mesas')
 const mesas = ref([])
 const platillos = ref([])
@@ -234,77 +210,59 @@ const cargando = ref(false)
 const guardando = ref(false)
 const error = ref(null)
 const errorForm = ref(null)
-
 const dialogoDetalle = ref(false)
 const detalle = ref(null)
-
 const dialogoReserva = ref(false)
 const form = ref({})
-
 const aviso = ref(false)
 const avisoTexto = ref('')
-
 let temporizador = null
-
 const headersMenu = [
   { title: '', key: 'imagen', sortable: false, width: 72 },
   { title: 'Nombre', key: 'nombre' },
   { title: 'Categoría', key: 'categoria' },
   { title: 'Precio', key: 'precio' }
 ]
-
 const mesasOcupadas = computed(
   () => mesas.value.filter((m) => estadoMesa(m) === 'ocupada').length
 )
-
 const mesasDisponibles = computed(
   () => mesas.value.filter((m) => estadoMesa(m) === 'disponible').length
 )
-
 const mesaSeleccionada = computed(
   () => mesas.value.find((m) => m.id_mesa === form.value.id_mesa) || null
 )
-
 const estadoMesa = (m) => String(m.estado || 'disponible').toLowerCase()
-
 const colorMesa = (m) => {
   const e = estadoMesa(m)
   if (e === 'ocupada') return 'warning'
   if (e === 'reservada') return 'info'
   return 'success'
 }
-
 const fecha = (f) => {
   if (!f) return '—'
   const [y, m, d] = String(f).slice(0, 10).split('-')
   return `${d}/${m}/${y}`
 }
-
 const hora = (h) => (h ? String(h).slice(0, 5) : '—')
-
 function reservaActiva(mesa) {
   return (mesa.reservas || []).find((r) =>
     ['pendiente', 'confirmada'].includes(String(r.estado).toLowerCase())
   )
 }
-
 function urlImagen(item) {
   const ruta = item.img
   if (!ruta) return ''
   if (ruta.startsWith('http')) return ruta
   return `${API_BASE}${ruta.startsWith('/') ? '' : '/'}${ruta}`
 }
-
 function mostrarAviso(texto) {
   avisoTexto.value = texto
   aviso.value = true
 }
-
-// --- Detalle de una MESA ---
 function verDetalleMesa(mesa) {
   const reserva = reservaActiva(mesa)
   const cliente = reserva?.cliente
-
   detalle.value = {
     titulo: `#${mesa.id_mesa}`,
     estado: mesa.estado,
@@ -324,8 +282,6 @@ function verDetalleMesa(mesa) {
   }
   dialogoDetalle.value = true
 }
-
-// --- Nueva reserva de mesa ---
 function abrirReserva(mesa) {
   errorForm.value = null
   form.value = {
@@ -337,20 +293,16 @@ function abrirReserva(mesa) {
   }
   dialogoReserva.value = true
 }
-
 async function guardarReserva() {
   errorForm.value = null
-
   if (!form.value.id_cliente || !form.value.fecha || !form.value.hora) {
     errorForm.value = 'Completa cliente, fecha y hora.'
     return
   }
-
   if (mesaSeleccionada.value && form.value.personas > mesaSeleccionada.value.capacidad) {
     errorForm.value = `La mesa solo admite ${mesaSeleccionada.value.capacidad} personas.`
     return
   }
-
   guardando.value = true
   try {
     await crearReservaMesa(form.value)
@@ -363,7 +315,6 @@ async function guardarReserva() {
     guardando.value = false
   }
 }
-
 async function cambiarEstado(mesa) {
   const orden = ['disponible', 'reservada', 'ocupada']
   const actual = estadoMesa(mesa)
@@ -380,46 +331,37 @@ async function cambiarEstado(mesa) {
     error.value = 'No se pudo cambiar el estado de la mesa.'
   }
 }
-
 async function cargar() {
   cargando.value = true
   error.value = null
-
   const [m, pl, c] = await Promise.allSettled([
     api.get('/mesas'),
     listarPlatillos(),
     listarClientes()
   ])
-
   mesas.value = m.status === 'fulfilled' ? m.value.data : []
   platillos.value = pl.status === 'fulfilled' ? pl.value.data : []
   clientes.value = c.status === 'fulfilled' ? c.value.data : []
-
   const fallos = []
   if (m.status === 'rejected') fallos.push('mesas')
   if (pl.status === 'rejected') fallos.push('platillos')
   if (c.status === 'rejected') fallos.push('clientes')
-
   if (fallos.length) {
     error.value = `No se pudo cargar: ${fallos.join(', ')}. Revisa la consola (F12).`
     console.warn('Errores de carga:', { mesas: m, platillos: pl, clientes: c })
   }
-
   cargando.value = false
 }
-
 onMounted(() => {
   cargar()
   temporizador = setInterval(() => {
     if (tab.value !== 'menu' && !dialogoReserva.value) cargar()
   }, 15000)
 })
-
 onUnmounted(() => {
   if (temporizador) clearInterval(temporizador)
 })
 </script>
-
 <style scoped>
 .mesa-ocupada { border-left: 4px solid #D4B483; }
 .mesa-disponible { border-left: 4px solid #0F3D2E; }

@@ -9,14 +9,11 @@
         Registrar cliente
       </v-btn>
     </div>
-
     <v-alert v-if="error" type="error" variant="tonal" class="mb-4">{{ error }}</v-alert>
-
     <v-card class="pa-4">
       <v-text-field v-model="busqueda" prepend-inner-icon="mdi-magnify"
         label="Buscar por nombre o documento" variant="outlined" density="comfortable"
         hide-details clearable class="mb-4" />
-
       <v-data-table
         item-value="id_cliente"
         :headers="headers"
@@ -32,20 +29,16 @@
         </template>
       </v-data-table>
     </v-card>
-
     <v-dialog v-model="dialogo" max-width="560">
       <v-card class="pa-4">
         <h3 class="text-h6 mb-4">{{ editando ? 'Editar cliente' : 'Registrar cliente' }}</h3>
-
         <v-alert v-if="error" type="error" variant="tonal" density="compact" class="mb-3">
           {{ error }}
         </v-alert>
-
         <v-text-field v-model="form.nombre" label="Nombre completo" variant="outlined" density="comfortable" />
         <v-text-field v-model="form.telefono" label="Teléfono" variant="outlined" density="comfortable" />
         <v-text-field v-model="form.email" label="Correo" type="email" variant="outlined" density="comfortable" />
         <v-text-field v-model="form.DUI" label="DUI" variant="outlined" density="comfortable" />
-
         <div class="d-flex justify-end mt-2" style="gap: 8px">
           <v-btn variant="text" @click="dialogo = false">Cancelar</v-btn>
           <v-btn color="#0F3D2E" :loading="guardando" @click="guardar">Guardar</v-btn>
@@ -54,21 +47,17 @@
     </v-dialog>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { listarClientes, crearCliente, actualizarCliente } from '@/services/clientesService'
-
 const clientes = ref([])
 const cargando = ref(false)
 const guardando = ref(false)
 const error = ref(null)
 const busqueda = ref('')
-
 const dialogo = ref(false)
 const editando = ref(null)
 const form = ref({})
-
 const headers = [
   { title: 'Nombre', key: 'nombre' },
   { title: 'Teléfono', key: 'telefono' },
@@ -76,7 +65,6 @@ const headers = [
   { title: 'DUI', key: 'DUI' },
   { title: 'Acciones', key: 'acciones', sortable: false }
 ]
-
 const filtrados = computed(() => {
   const q = busqueda.value?.toLowerCase().trim()
   if (!q) return clientes.value
@@ -85,7 +73,6 @@ const filtrados = computed(() => {
     String(c.DUI || '').toLowerCase().includes(q)
   )
 })
-
 async function cargar() {
   cargando.value = true
   error.value = null
@@ -99,14 +86,12 @@ async function cargar() {
     cargando.value = false
   }
 }
-
 function abrirNuevo() {
   editando.value = null
   error.value = null
   form.value = { nombre: '', telefono: '', email: '', DUI: '' }
   dialogo.value = true
 }
-
 function editar(item) {
   editando.value = item
   error.value = null
@@ -118,7 +103,6 @@ function editar(item) {
   }
   dialogo.value = true
 }
-
 async function guardar() {
   if (!form.value.nombre) {
     error.value = 'El nombre es obligatorio.'
@@ -143,6 +127,5 @@ async function guardar() {
     guardando.value = false
   }
 }
-
 onMounted(cargar)
 </script>

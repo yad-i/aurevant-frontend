@@ -16,11 +16,9 @@
         </v-btn>
       </div>
     </div>
-
     <v-alert v-if="error" type="error" density="compact" variant="tonal" class="mb-4">
       {{ error }}
     </v-alert>
-
     <v-row class="mb-2">
       <v-col cols="12" sm="6" md="3">
         <v-card class="pa-4 kpi">
@@ -47,7 +45,6 @@
         </v-card>
       </v-col>
     </v-row>
-
     <v-card class="pa-4">
       <div class="d-flex justify-space-between align-center mb-3">
         <h3 class="text-subtitle-1 font-weight-bold">Listado de clientes</h3>
@@ -61,7 +58,6 @@
           style="max-width: 320px"
         />
       </div>
-
       <v-data-table
         :headers="headers"
         :items="filtrados"
@@ -76,13 +72,11 @@
             <p class="text-caption text-medium-emphasis mb-0">{{ item.email || '—' }}</p>
           </div>
         </template>
-
         <template #item.DUI="{ item }">
           <span :class="item.DUI ? '' : 'text-medium-emphasis'">
             {{ item.DUI || 'Sin DUI' }}
           </span>
         </template>
-
         <template #item.acciones="{ item }">
           <div class="d-flex ga-1 justify-end">
             <v-btn icon="mdi-pencil" size="small" variant="text" @click="abrirEditar(item)" />
@@ -98,17 +92,14 @@
         </template>
       </v-data-table>
     </v-card>
-
     <v-dialog v-model="dialogo" max-width="520">
       <v-card class="pa-6">
         <h3 class="text-h6 font-weight-bold mb-4">
           {{ editando ? 'Editar cliente' : 'Nuevo cliente' }}
         </h3>
-
         <v-alert v-if="errorForm" type="error" density="compact" variant="tonal" class="mb-4">
           {{ errorForm }}
         </v-alert>
-
         <v-text-field
           v-model="form.nombre"
           label="Nombre completo"
@@ -116,7 +107,6 @@
           density="comfortable"
           class="mb-3"
         />
-
         <v-text-field
           v-model="form.telefono"
           label="Teléfono"
@@ -125,7 +115,6 @@
           prepend-inner-icon="mdi-phone"
           class="mb-3"
         />
-
         <v-text-field
           v-model="form.email"
           label="Correo"
@@ -135,7 +124,6 @@
           prepend-inner-icon="mdi-email"
           class="mb-3"
         />
-
         <v-text-field
           v-model="form.DUI"
           label="DUI (opcional)"
@@ -146,7 +134,6 @@
           persistent-hint
           class="mb-4"
         />
-
         <div class="d-flex justify-end ga-2">
           <v-btn variant="text" @click="dialogo = false">Cancelar</v-btn>
           <v-btn color="#0F3D2E" :loading="guardando" @click="guardar">
@@ -155,7 +142,6 @@
         </div>
       </v-card>
     </v-dialog>
-
     <v-dialog v-model="dialogoEliminar" max-width="420">
       <v-card class="pa-6">
         <h3 class="text-h6 font-weight-bold mb-2">Eliminar cliente</h3>
@@ -169,45 +155,35 @@
         </div>
       </v-card>
     </v-dialog>
-
     <v-snackbar v-model="aviso" :timeout="3000" color="#0F3D2E">
       {{ avisoTexto }}
     </v-snackbar>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
 import { useRoute, useRouter } from 'vue-router'
-
 const route = useRoute()
 const router = useRouter()
-
-
 const clientes = ref([])
 const busqueda = ref('')
 const error = ref(null)
-
 const dialogo = ref(false)
 const editando = ref(false)
 const guardando = ref(false)
 const errorForm = ref(null)
-
 const dialogoEliminar = ref(false)
 const aEliminar = ref(null)
 const eliminando = ref(false)
-
 const aviso = ref(false)
 const avisoTexto = ref('')
-
 const headers = [
   { title: 'Cliente', key: 'nombre' },
   { title: 'Teléfono', key: 'telefono' },
   { title: 'DUI', key: 'DUI' },
   { title: 'Acciones', key: 'acciones', sortable: false, align: 'end' }
 ]
-
 const form = ref({
   id_cliente: null,
   nombre: '',
@@ -215,7 +191,6 @@ const form = ref({
   email: '',
   DUI: ''
 })
-
 const esAdmin = computed(() => {
   try {
     const u = JSON.parse(localStorage.getItem('usuario') || '{}')
@@ -224,17 +199,14 @@ const esAdmin = computed(() => {
     return false
   }
 })
-
 const registradosHoy = computed(() => {
   const hoy = new Date().toDateString()
   return clientes.value.filter(c =>
     c.created_at && new Date(c.created_at).toDateString() === hoy
   ).length
 })
-
 const sinDui = computed(() => clientes.value.filter(c => !c.DUI).length)
 const conCorreo = computed(() => clientes.value.filter(c => !!c.email).length)
-
 const filtrados = computed(() => {
   const q = busqueda.value.trim().toLowerCase()
   if (!q) return clientes.value
@@ -244,12 +216,10 @@ const filtrados = computed(() => {
       .some(v => String(v).toLowerCase().includes(q))
   )
 })
-
 function mostrarAviso(texto) {
   avisoTexto.value = texto
   aviso.value = true
 }
-
 async function cargar() {
   error.value = null
   try {
@@ -259,14 +229,12 @@ async function cargar() {
     error.value = 'No se pudieron cargar los clientes.'
   }
 }
-
 function abrirCrear() {
   errorForm.value = null
   editando.value = false
   form.value = { id_cliente: null, nombre: '', telefono: '', email: '', DUI: '' }
   dialogo.value = true
 }
-
 function abrirEditar(cliente) {
   errorForm.value = null
   editando.value = true
@@ -279,15 +247,12 @@ function abrirEditar(cliente) {
   }
   dialogo.value = true
 }
-
 async function guardar() {
   errorForm.value = null
-
   if (!form.value.nombre || !form.value.telefono) {
     errorForm.value = 'El nombre y el teléfono son obligatorios.'
     return
   }
-
   guardando.value = true
   try {
     const payload = {
@@ -296,7 +261,6 @@ async function guardar() {
       email: form.value.email || null,
       DUI: form.value.DUI || null
     }
-
     if (editando.value) {
       await api.put(`/clientes/${form.value.id_cliente}`, payload)
       mostrarAviso('Cliente actualizado.')
@@ -304,7 +268,6 @@ async function guardar() {
       await api.post('/clientes', payload)
       mostrarAviso('Cliente registrado.')
     }
-
     dialogo.value = false
     await cargar()
   } catch (e) {
@@ -313,12 +276,10 @@ async function guardar() {
     guardando.value = false
   }
 }
-
 function pedirEliminar(cliente) {
   aEliminar.value = cliente
   dialogoEliminar.value = true
 }
-
 async function eliminar() {
   eliminando.value = true
   try {
@@ -332,26 +293,18 @@ async function eliminar() {
     eliminando.value = false
   }
 }
-
-/* Si llegamos desde el dashboard con ?id=, abre ese cliente */
 async function abrirDesdeQuery() {
   const id = route.query.id
   if (!id) return
-
   const cliente = clientes.value.find(c => String(c.id_cliente) === String(id))
   if (cliente) abrirEditar(cliente)
-
-  // Limpia el ?id= para que al recargar no se vuelva a abrir
   router.replace({ path: route.path })
 }
-
 onMounted(async () => {
   await cargar()
   abrirDesdeQuery()
 })
-
 </script>
-
 <style scoped>
 .kpi {
   border: 1px solid rgba(212, 180, 131, 0.45);

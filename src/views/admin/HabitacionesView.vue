@@ -1,6 +1,5 @@
 <template>
   <div class="habitaciones-view">
-    <!-- Encabezado -->
     <div class="d-flex align-center justify-space-between mb-6">
       <div>
         <h1 class="titulo">Habitaciones</h1>
@@ -10,8 +9,6 @@
         <v-icon left>mdi-plus</v-icon> Nueva habitación
       </v-btn>
     </div>
-
-    <!-- Búsqueda -->
     <v-text-field
       v-model="busqueda"
       label="Buscar por número o tipo"
@@ -21,8 +18,6 @@
       class="mb-4"
       clearable
     ></v-text-field>
-
-    <!-- Grid de habitaciones -->
     <v-row v-if="habitacionesFiltradas.length">
       <v-col
         v-for="h in habitacionesFiltradas"
@@ -44,11 +39,9 @@
               {{ h.estado }}
             </v-chip>
           </v-img>
-
           <v-card-title class="py-2">
             {{ h.tipo }} · Hab. {{ h.numero }}
           </v-card-title>
-
           <v-card-text class="pt-0">
             <div class="text-h6 gold">${{ h.precio_noche }} / noche</div>
             <div class="mt-1 meta">
@@ -62,7 +55,6 @@
             </div>
             <p class="descripcion mt-2">{{ h.descripcion }}</p>
           </v-card-text>
-
           <v-card-actions>
             <v-btn size="small" variant="text" color="#0F3D2E" @click="editarHabitacion(h)">
               <v-icon left size="small">mdi-pencil</v-icon> Editar
@@ -81,19 +73,14 @@
         </v-card>
       </v-col>
     </v-row>
-
-    <!-- Mensaje si no hay resultados -->
     <v-alert v-else type="info" variant="outlined" class="mt-4">
       No hay habitaciones que coincidan con la búsqueda.
     </v-alert>
-
-    <!-- Diálogo de crear/editar -->
     <v-dialog v-model="dialogo" max-width="600">
       <v-card>
         <v-card-title class="headline">
           {{ editando ? 'Editar habitación' : 'Nueva habitación' }}
         </v-card-title>
-
         <v-card-text>
           <v-form>
             <v-row>
@@ -162,8 +149,6 @@
                 ></v-textarea>
               </v-col>
             </v-row>
-
-<!-- Imagen -->
 <div class="mt-2">
   <p class="mb-1">Imagen de la habitación</p>
   <v-img
@@ -184,10 +169,8 @@
     @update:modelValue="previsualizarArchivo"
   ></v-file-input>
 </div>
-
           </v-form>
         </v-card-text>
-
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn variant="text" @click="dialogo = false">Cancelar</v-btn>
@@ -197,8 +180,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-    <!-- Diálogo de zoom de imagen -->
     <v-dialog v-model="abrirPreview" max-width="700">
       <v-img
         v-if="abrirPreview"
@@ -209,19 +190,16 @@
     </v-dialog>
   </div>
 </template>
-
 <script setup>
 import { ref, computed } from 'vue'
 import api from '@/services/api'
-
 const busqueda = ref('')
 const dialogo = ref(false)
 const editando = ref(false)
 const abrirPreview = ref(false)
 const archivo = ref(null)
-const preview = ref('')          // 👈 CAMBIO: preview separada del form
+const preview = ref('')          
 const habitaciones = ref([])
-
 const form = ref({
   numero: '',
   tipo: null,
@@ -234,7 +212,6 @@ const form = ref({
   activa: true,
   img: ''
 })
-
 async function cargarHabitaciones() {
   try {
     const { data } = await api.get('/habitaciones')
@@ -244,7 +221,6 @@ async function cargarHabitaciones() {
   }
 }
 cargarHabitaciones()
-
 const habitacionesFiltradas = computed(() => {
   const q = busqueda.value.trim().toLowerCase()
   if (!q) return habitaciones.value
@@ -254,8 +230,6 @@ const habitacionesFiltradas = computed(() => {
       String(h.tipo).toLowerCase().includes(q)
   )
 })
-
-// 👉 CAMBIO 1: ahora también valida estado
 const formValido = computed(
   () =>
     !!form.value.numero?.trim() &&
@@ -265,13 +239,11 @@ const formValido = computed(
     Number(form.value.precio_noche) > 0 &&
     Number(form.value.capacidad) >= 1
 )
-
 const urlImagen = (img) => {
   if (!img) return 'https://via.placeholder.com/400x200?text=Sin+imagen'
   if (img.startsWith('http') || img.startsWith('blob:')) return img
   return `http://127.0.0.1:8000/storage/${img}`
 }
-
 function abrirDialogoNueva() {
   editando.value = false
   form.value = {
@@ -290,8 +262,6 @@ function abrirDialogoNueva() {
   preview.value = ''
   dialogo.value = true
 }
-
-// 👉 CAMBIO 2: no copiar todo el objeto del servidor
 function editarHabitacion(h) {
   editando.value = true
   form.value = {
@@ -311,13 +281,10 @@ function editarHabitacion(h) {
   preview.value = ''
   dialogo.value = true
 }
-
-// 👉 CAMBIO 3: la preview ya no pisa form.img
 function previsualizarArchivo(file) {
   const f = Array.isArray(file) ? file[0] : file
   preview.value = f instanceof File ? URL.createObjectURL(f) : ''
 }
-
 async function guardar() {
   if (!formValido.value) return
   try {
@@ -331,10 +298,8 @@ async function guardar() {
     fd.append('balcon', form.value.balcon ? '1' : '0')
     fd.append('estado', form.value.estado)
     fd.append('activa', form.value.activa ? '1' : '0')
-
     const f = Array.isArray(archivo.value) ? archivo.value[0] : archivo.value
     if (f instanceof File) fd.append('img', f)
-
     if (editando.value) {
       fd.append('_method', 'PUT')
       const { data } = await api.post(`/habitaciones/${form.value.id_habitacion}`, fd, {
@@ -350,14 +315,12 @@ async function guardar() {
     }
     dialogo.value = false
   } catch (e) {
-    // 👉 CAMBIO 4: ver el error real
     if (e.response?.status === 422) {
       console.table(e.response.data.errors)
     }
     console.error('Error al guardar', e.response?.data ?? e)
   }
 }
-
 async function desactivarHabitacion(h) {
   try {
     const { data } = await api.patch(`/habitaciones/${h.id_habitacion}/toggle`)
@@ -367,7 +330,6 @@ async function desactivarHabitacion(h) {
     console.error('Error al cambiar estado', e)
   }
 }
-
 function colorHabitacion(e) {
   if (e === 'Disponible') return 'success'
   if (e === 'Ocupada') return 'warning'

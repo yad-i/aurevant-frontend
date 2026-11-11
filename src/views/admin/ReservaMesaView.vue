@@ -11,11 +11,9 @@
         Actualizar
       </v-btn>
     </div>
-
     <v-alert v-if="error" type="error" density="compact" variant="tonal" class="mb-4">
       {{ error }}
     </v-alert>
-
     <v-row dense class="mb-6">
       <v-col cols="12" sm="4">
         <v-card class="pa-4">
@@ -36,7 +34,6 @@
         </v-card>
       </v-col>
     </v-row>
-
     <v-row dense>
       <v-col v-for="m in mesas" :key="m.id_mesa" cols="12" sm="6" md="4" lg="3">
         <v-card class="pa-4 h-100" :style="{ borderLeft: `4px solid ${colorMesa(m)}` }">
@@ -46,7 +43,6 @@
               {{ m.estado }}
             </v-chip>
           </div>
-
           <p class="text-body-2 mb-1">
             <v-icon size="16" class="mr-1">mdi-account-group</v-icon>
             {{ m.capacidad }} personas
@@ -55,7 +51,6 @@
             <v-icon size="16" class="mr-1">mdi-map-marker</v-icon>
             {{ m.ambiente }}
           </p>
-
           <p
             v-if="m.liberar_en && m.estado !== 'disponible'"
             class="text-caption mb-2"
@@ -64,8 +59,6 @@
             <v-icon size="14" class="mr-1">mdi-timer-outline</v-icon>
             Se libera en {{ minutosRestantes(m) }}
           </p>
-
-          <!-- CAMBIO: botones explícitos en vez de v-select, que revertía el estado solo -->
           <div class="d-flex ga-2 mb-3">
             <v-btn
               v-if="m.estado !== 'disponible'"
@@ -87,7 +80,6 @@
               Ocupar
             </v-btn>
           </div>
-
           <div class="d-flex justify-space-between align-center">
             <v-btn
               size="small"
@@ -105,8 +97,6 @@
         </v-card>
       </v-col>
     </v-row>
-
-    <!-- Diálogo de reserva -->
     <v-dialog v-model="dialogoReserva" max-width="520">
       <v-card class="pa-6">
         <h3 class="text-h6 mb-1">Reservar mesa {{ mesaSeleccionada?.id_mesa }}</h3>
@@ -114,11 +104,9 @@
           Se registrará como <strong>pendiente</strong>. Si no se confirma,
           la mesa se libera en <strong>5 minutos</strong>.
         </p>
-
         <v-alert v-if="errorForm" type="error" density="compact" variant="tonal" class="mb-4">
           {{ errorForm }}
         </v-alert>
-
         <v-text-field
           v-model="form.nombre"
           label="Cliente"
@@ -127,7 +115,6 @@
           prepend-inner-icon="mdi-account"
           class="mb-3"
         />
-
         <v-text-field
           v-model="form.telefono"
           label="Teléfono"
@@ -138,7 +125,6 @@
           persistent-hint
           class="mb-3"
         />
-
         <v-row dense>
           <v-col cols="12" sm="6">
             <v-text-field
@@ -159,7 +145,6 @@
             />
           </v-col>
         </v-row>
-
         <v-text-field
           v-model.number="form.personas"
           type="number"
@@ -170,7 +155,6 @@
           persistent-hint
           class="mb-4"
         />
-
         <div class="d-flex justify-end ga-2">
           <v-btn variant="text" @click="dialogoReserva = false">Cancelar</v-btn>
           <v-btn color="primary" :loading="guardando" @click="guardarReserva">
@@ -179,15 +163,12 @@
         </div>
       </v-card>
     </v-dialog>
-
-    <!-- Diálogo de detalle -->
     <v-dialog v-model="dialogoDetalle" max-width="460">
       <v-card class="pa-6" v-if="detalle">
         <h3 class="text-h6 mb-1">Mesa {{ detalle.titulo }}</h3>
         <v-chip size="small" :color="detalle.color" variant="flat" class="mb-4">
           {{ detalle.estado }}
         </v-chip>
-
         <v-list density="compact">
           <v-list-item v-for="f in detalle.filas" :key="f.etiqueta">
             <v-list-item-title class="text-body-2">
@@ -195,42 +176,34 @@
             </v-list-item-title>
           </v-list-item>
         </v-list>
-
         <div class="d-flex justify-end mt-4">
           <v-btn variant="text" @click="dialogoDetalle = false">Cerrar</v-btn>
         </div>
       </v-card>
     </v-dialog>
-
     <v-snackbar v-model="aviso" :timeout="3000" color="success">
       {{ avisoTexto }}
     </v-snackbar>
   </v-container>
 </template>
-
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import api from '@/services/api'
-
 const mesas = ref([])
 const error = ref(null)
 const aviso = ref(false)
 const avisoTexto = ref('')
-
 const dialogoReserva = ref(false)
 const mesaSeleccionada = ref(null)
 const guardando = ref(false)
 const errorForm = ref(null)
-
 const dialogoDetalle = ref(false)
 const detalle = ref(null)
-
 function hoyLocal() {
   const d = new Date()
   const off = d.getTimezoneOffset() * 60000
   return new Date(d - off).toISOString().slice(0, 10)
 }
-
 const form = ref({
   id_mesa: null,
   nombre: '',
@@ -239,10 +212,8 @@ const form = ref({
   hora: '',
   personas: 1
 })
-
 let intervalo = null
 let reloj = null
-
 const ocupadas = computed(() => mesas.value.filter(m => m.estado === 'ocupada').length)
 const disponibles = computed(() => mesas.value.filter(m => m.estado === 'disponible').length)
 const pendientes = computed(() =>
@@ -251,32 +222,25 @@ const pendientes = computed(() =>
     0
   )
 )
-
 function colorMesa(m) {
   if (m.estado === 'ocupada') return '#B8860B'
   if (m.estado === 'reservada') return '#1E4D3B'
   return '#4CAF50'
 }
-
 function reservaActiva(m) {
   return (m.reservas || []).find(r => r.estado === 'pendiente') || null
 }
-
 function minutosRestantes(mesa) {
   if (!mesa?.liberar_en) return '—'
   const ms = new Date(mesa.liberar_en) - new Date()
   if (ms <= 0) return 'menos de 1 min'
   return `${Math.ceil(ms / 60000)} min`
 }
-
-// NUEVO: fuerza el re-render cada 10 s para que el contador baje en pantalla
 const tick = ref(0)
-
 function mostrarAviso(texto) {
   avisoTexto.value = texto
   aviso.value = true
 }
-
 async function cargar() {
   error.value = null
   try {
@@ -287,7 +251,6 @@ async function cargar() {
     error.value = 'No se pudieron cargar las mesas.'
   }
 }
-
 function abrirReserva(mesa) {
   errorForm.value = null
   mesaSeleccionada.value = mesa
@@ -301,20 +264,16 @@ function abrirReserva(mesa) {
   }
   dialogoReserva.value = true
 }
-
 async function guardarReserva() {
   errorForm.value = null
-
   if (!form.value.nombre || !form.value.telefono || !form.value.hora) {
     errorForm.value = 'Completa nombre, teléfono y hora.'
     return
   }
-
   if (form.value.personas > (mesaSeleccionada.value?.capacidad || 0)) {
     errorForm.value = `La mesa solo admite ${mesaSeleccionada.value.capacidad} personas.`
     return
   }
-
   guardando.value = true
   try {
     await api.post('/reserva-mesas', form.value)
@@ -327,7 +286,6 @@ async function guardarReserva() {
     guardando.value = false
   }
 }
-
 async function cambiarEstado(mesa, nuevo) {
   if (nuevo === mesa.estado) return
   try {
@@ -338,7 +296,6 @@ async function cambiarEstado(mesa, nuevo) {
     error.value = 'No se pudo cambiar el estado de la mesa.'
   }
 }
-
 function verDetalle(mesa) {
   const activa = reservaActiva(mesa)
   detalle.value = {
@@ -360,13 +317,11 @@ function verDetalle(mesa) {
   }
   dialogoDetalle.value = true
 }
-
 onMounted(() => {
   cargar()
   intervalo = setInterval(cargar, 15000)
   reloj = setInterval(() => { tick.value++ }, 10000)
 })
-
 onUnmounted(() => {
   clearInterval(intervalo)
   clearInterval(reloj)

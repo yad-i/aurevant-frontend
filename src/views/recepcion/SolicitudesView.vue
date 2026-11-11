@@ -9,9 +9,7 @@
         Actualizar
       </v-btn>
     </div>
-
     <v-alert v-if="error" type="error" variant="tonal" class="mb-4">{{ error }}</v-alert>
-
     <v-card class="pa-4">
       <v-data-table
         :headers="headers"
@@ -39,7 +37,6 @@
         </template>
       </v-data-table>
     </v-card>
-
     <v-dialog v-model="dialogoRechazo" max-width="460">
       <v-card class="pa-4">
         <h3 class="text-h6 mb-2">Rechazar solicitud</h3>
@@ -52,7 +49,6 @@
         </div>
       </v-card>
     </v-dialog>
-
     <v-dialog v-model="dialogoDetalle" max-width="520">
       <v-card class="pa-4" v-if="seleccionada">
         <h3 class="text-h6 mb-3">Detalle de la solicitud</h3>
@@ -72,11 +68,9 @@
     </v-dialog>
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted } from 'vue'
 import { listarSolicitudes, aprobarSolicitud, rechazarSolicitud } from '@/services/solicitudesService'
-
 const solicitudes = ref([])
 const cargando = ref(false)
 const error = ref(null)
@@ -85,7 +79,6 @@ const dialogoDetalle = ref(false)
 const seleccionada = ref(null)
 const motivo = ref('')
 const procesando = ref(false)
-
 const headers = [
   { title: 'Cliente', key: 'cliente' },
   { title: 'Habitación', key: 'habitacion' },
@@ -95,7 +88,6 @@ const headers = [
   { title: 'Estado', key: 'estado' },
   { title: 'Acciones', key: 'acciones', sortable: false }
 ]
-
 const fecha = (f) => {
   if (!f) return '—'
   const [y, m, d] = String(f).slice(0, 10).split('-')
@@ -109,7 +101,6 @@ const colorEstado = (e) => {
   if (s === 'rechazada' || s === 'cancelada') return 'error'
   return 'grey'
 }
-
 async function cargar() {
   cargando.value = true
   error.value = null
@@ -123,7 +114,6 @@ async function cargar() {
     cargando.value = false
   }
 }
-
 async function aprobar(item) {
   if (!confirm(`¿Aprobar la solicitud de ${item.cliente}?`)) return
   procesando.value = true
@@ -136,13 +126,11 @@ async function aprobar(item) {
     procesando.value = false
   }
 }
-
 function abrirRechazo(item) {
   seleccionada.value = item
   motivo.value = ''
   dialogoRechazo.value = true
 }
-
 async function confirmarRechazo() {
   if (!motivo.value.trim()) return
   procesando.value = true
@@ -156,11 +144,9 @@ async function confirmarRechazo() {
     procesando.value = false
   }
 }
-
 function verDetalle(item) {
   seleccionada.value = item
   dialogoDetalle.value = true
 }
-
 onMounted(cargar)
 </script>

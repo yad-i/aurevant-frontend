@@ -9,11 +9,9 @@
         Nuevo platillo
       </v-btn>
     </div>
-
     <v-alert v-if="error" type="error" variant="tonal" class="mb-4" closable @click:close="error = ''">
       {{ error }}
     </v-alert>
-
     <v-card class="panel" elevation="0">
       <v-data-table
         :headers="headers"
@@ -60,17 +58,13 @@
         </template>
       </v-data-table>
     </v-card>
-
-    <!-- Modal crear / editar -->
     <v-dialog v-model="dialog" max-width="560">
       <v-card class="pa-4" elevation="0">
         <v-card-title class="text-h6">
           {{ editando ? 'Editar platillo' : 'Nuevo platillo' }}
         </v-card-title>
-
         <v-card-text>
           <v-text-field v-model="form.nombre" label="Nombre" variant="outlined" density="compact" class="mb-2" />
-
           <v-row dense>
             <v-col cols="12" sm="6">
               <v-select
@@ -113,10 +107,8 @@
               />
             </v-col>
           </v-row>
-
           <v-textarea v-model="form.descripcion" label="Descripción" rows="2" variant="outlined" density="compact" class="mb-2" />
           <v-textarea v-model="form.ingredientes" label="Ingredientes" rows="2" variant="outlined" density="compact" class="mb-2" />
-
           <v-file-input
             v-model="archivo"
             label="Imagen del platillo (PNG o JPG)"
@@ -129,7 +121,6 @@
             :rules="reglasImagen"
             @update:model-value="previsualizar"
           />
-
           <div v-if="preview" class="preview-box">
             <v-img :src="preview" height="150" cover class="rounded-lg" />
             <v-btn
@@ -142,7 +133,6 @@
             >Quitar imagen</v-btn>
           </div>
         </v-card-text>
-
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="cerrarDialog">Cancelar</v-btn>
@@ -150,7 +140,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
     <!-- Confirmar eliminar -->
     <v-dialog v-model="dialogEliminar" max-width="400">
       <v-card class="pa-4" elevation="0">
@@ -167,15 +156,12 @@
     </v-dialog>
   </div>
 </template>
-
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import {
   listarPlatillos, crearPlatillo, actualizarPlatillo, eliminarPlatillo
 } from '@/services/platillosService'
-
 const API_BASE = 'http://localhost:8000'
-
 const headers = [
   { title: 'Imagen', key: 'img', sortable: false },
   { title: 'Nombre', key: 'nombre' },
@@ -185,7 +171,6 @@ const headers = [
   { title: 'Estado', key: 'activo' },
   { title: 'Acciones', key: 'acciones', sortable: false }
 ]
-
 const categorias = [
   'Entradas',
   'Sopas y caldos',
@@ -199,33 +184,26 @@ const categorias = [
   'Bebidas',
   'Cocteles'
 ]
-
 const tipos = [
   { label: 'Platillo', value: 'platillo' },
   { label: 'Bebida', value: 'bebida' }
 ]
-
 const platillos = ref([])
 const cargando = ref(false)
 const guardando = ref(false)
 const eliminando = ref(false)
 const error = ref('')
-
 const dialog = ref(false)
 const editando = ref(false)
 const idEditando = ref(null)
-
 const dialogEliminar = ref(false)
 const aEliminar = ref(null)
-
 const archivo = ref(null)
 const preview = ref('')
-
 const reglasImagen = [
   v => !v || !v.length || v[0].size < 2 * 1024 * 1024 || 'La imagen debe pesar menos de 2 MB',
   v => !v || !v.length || ['image/png', 'image/jpeg', 'image/webp'].includes(v[0].type) || 'Solo PNG, JPG o WEBP'
 ]
-
 const form = reactive({
   nombre: '',
   categoria: 'Platos fuertes',
@@ -235,36 +213,30 @@ const form = reactive({
   ingredientes: '',
   activo: true
 })
-
-/* Acepta "/storage/..." y también rutas relativas tipo "platillos/abc.jpg" */
-function urlImagen(ruta) {                                    // ←
-  if (!ruta) return ''                                        // ←
+function urlImagen(ruta) {                                    
+  if (!ruta) return ''                                       
   if (ruta.startsWith('http') || ruta.startsWith('blob:')) return ruta
   if (ruta.startsWith('/storage/')) return `${API_BASE}${ruta}`
-  return `${API_BASE}/storage/${ruta}`                        // ←
+  return `${API_BASE}/storage/${ruta}`                       
 }
-
 function previsualizar(files) {
   const f = Array.isArray(files) ? files[0] : files
   if (!f) return
-  if (preview.value.startsWith('blob:')) URL.revokeObjectURL(preview.value)  // ←
+  if (preview.value.startsWith('blob:')) URL.revokeObjectURL(preview.value)  
   preview.value = URL.createObjectURL(f)
 }
-
 function quitarImagen() {
-  if (preview.value.startsWith('blob:')) URL.revokeObjectURL(preview.value)  // ←
+  if (preview.value.startsWith('blob:')) URL.revokeObjectURL(preview.value)  
   archivo.value = null
   preview.value = ''
 }
-
-function cerrarDialog() {                                     // ←
+function cerrarDialog() {                                   
   dialog.value = false
-  setTimeout(() => {                                          // ←
+  setTimeout(() => {                                         
     archivo.value = null
     preview.value = ''
   }, 300)
 }
-
 async function cargar() {
   cargando.value = true
   error.value = ''
@@ -277,7 +249,6 @@ async function cargar() {
     cargando.value = false
   }
 }
-
 function limpiarForm() {
   Object.assign(form, {
     nombre: '',
@@ -291,14 +262,12 @@ function limpiarForm() {
   archivo.value = null
   preview.value = ''
 }
-
 function abrirNuevo() {
   limpiarForm()
   editando.value = false
   idEditando.value = null
   dialog.value = true
 }
-
 function editar(item) {
   Object.assign(form, {
     nombre: item.nombre,
@@ -315,19 +284,16 @@ function editar(item) {
   idEditando.value = item.id_platillo
   dialog.value = true
 }
-
 async function guardar() {
   if (!form.nombre || Number(form.precio) <= 0) {
     error.value = 'El nombre es obligatorio y el precio debe ser mayor a 0.'
     return
   }
-
   guardando.value = true
   error.value = ''
   try {
     const f = Array.isArray(archivo.value) ? archivo.value[0] : archivo.value
     const payload = { ...form, img: f || null }
-
     if (editando.value) {
       const { data } = await actualizarPlatillo(idEditando.value, payload)
       const i = platillos.value.findIndex(p => p.id_platillo === idEditando.value)
@@ -343,7 +309,6 @@ async function guardar() {
     guardando.value = false
   }
 }
-
 async function alternarActivo(item) {
   try {
     const { data } = await actualizarPlatillo(item.id_platillo, {
@@ -361,12 +326,10 @@ async function alternarActivo(item) {
     error.value = 'No se pudo cambiar el estado del platillo.'
   }
 }
-
 function confirmarEliminar(item) {
   aEliminar.value = item
   dialogEliminar.value = true
 }
-
 async function eliminar() {
   eliminando.value = true
   try {
@@ -382,10 +345,8 @@ async function eliminar() {
     eliminando.value = false
   }
 }
-
 onMounted(cargar)
 </script>
-
 <style scoped>
 .page-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: #1A1A1A; }
 .page-sub { font-size: 13px; color: #6B6B6B; }

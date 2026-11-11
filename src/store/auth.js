@@ -1,5 +1,4 @@
 import api from '@/services/api'
-
 export default {
   namespaced: true,
   state: () => ({
@@ -12,7 +11,6 @@ export default {
     rol: (state) => state.user?.rol || null,
     isAdmin: (state) => state.user?.rol === 'admin',
 isRecepcion: (state) => state.user?.rol === 'recepcion',
-
   },
   mutations: {
     SET_SESSION(state, { token, user }) {
@@ -27,11 +25,9 @@ isRecepcion: (state) => state.user?.rol === 'recepcion',
   actions: {
     async login({ commit }, { email, password }) {
       const { data } = await api.post('/login', { email, password })
-
       localStorage.setItem('token', data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
       commit('SET_SESSION', { token: data.token, user: data.user })
-
       return data
     },
     logout({ commit }) {
